@@ -876,7 +876,7 @@ install_ubuntu_git_post() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        if [ -f /sbin/initctl ]; then
+        if [ "${INSTALL_DEBIAN_INIT_SCRIPT:-x}" = "x" ] && [ -f /sbin/initctl ]; then
             # We have upstart support
             /sbin/initctl status salt-$fname > /dev/null 2>&1
             if [ $? -eq 1 ]; then
