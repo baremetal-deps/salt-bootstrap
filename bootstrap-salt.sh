@@ -2403,7 +2403,7 @@ if [ "$DAEMONS_RUNNING_FUNC" != "null" ]; then
 
             [ ! $SALT_ETC_DIR/$fname ] && [ $fname != "syndic" ] && echodebug "$SALT_ETC_DIR/$fname does not exist"
 
-            echodebug "Running salt-$fname by hand outputs: $(salt-$fname -l debug)"
+            #echodebug "Running salt-$fname by hand outputs: $(salt-$fname -l debug)"
 
             [ ! -f /var/log/salt/$fname ] && echodebug "/var/log/salt/$fname does not exist. Can't cat its contents!" && continue
 
