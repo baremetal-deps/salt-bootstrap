@@ -948,7 +948,7 @@ install_ubuntu_git_post() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
-        if [ -f /sbin/initctl ]; then
+        if [ "${INSTALL_DEBIAN_INIT_SCRIPT:-x}" = "x" ] && [ -f /sbin/initctl ]; then
             # We have upstart support
             echodebug "There's upstart support"
             /sbin/initctl status salt-$fname > /dev/null 2>&1
@@ -980,6 +980,8 @@ install_ubuntu_restart_daemons() {
         [ $fname = "master" ] && [ $INSTALL_MASTER -eq $BS_FALSE ] && continue
         [ $fname = "syndic" ] && [ $INSTALL_SYNDIC -eq $BS_FALSE ] && continue
 
+        # disable auto-exit, trying to stop a stopped service will fail
+        set +e
         if [ -f /sbin/initctl ]; then
             echodebug "There's upstart support"
             /sbin/initctl status salt-$fname || \
@@ -1004,6 +1006,7 @@ install_ubuntu_restart_daemons() {
 
         /etc/init.d/salt-$fname stop > /dev/null 2>&1
         /etc/init.d/salt-$fname start
+        set -e
     done
     return 0
 }
