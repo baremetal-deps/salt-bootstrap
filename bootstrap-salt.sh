@@ -199,7 +199,7 @@ shift $(($OPTIND-1))
 
 __check_unparsed_options() {
     shellopts="$1"
-    unparsed_options=$( echo "$shellopts" | grep -E '[-]+[[:alnum:]]' )
+    unparsed_options=$( echo "$shellopts" | grep -E '(^[-]+[[:alnum:]]| [-]+[[:alnum:]])' )
     if [ "x$unparsed_options" != "x" ]; then
         usage
         echo
@@ -241,6 +241,14 @@ if [ $ITYPE = "git" ]; then
     if [ "$#" -eq 0 ];then
         GIT_REV="master"
     else
+        # if there is more than one arg here, then a git repo was given.
+        if [ "$#" -gt 1 ]; then
+            GIT_REPO="$1"
+            shift
+        else
+            GIT_REPO=https://github.com/saltstack/salt.git
+        fi;
+
         __check_unparsed_options "$*"
         GIT_REV="$1"
         shift
@@ -753,6 +761,13 @@ __git_clone_and_checkout() {
     cd /tmp/git
     if [ -d $SALT_GIT_CHECKOUT_DIR ]; then
         cd $SALT_GIT_CHECKOUT_DIR
+
+        # update the git repo if it's not the same as the one requested.
+        git remote -v | grep -q $GIT_REPO
+        if [ $? -ne 0 ]; then
+            git remote set-url origin $GIT_REPO
+        fi;
+
         git fetch || return 1
         # Tags are needed because of salt's versioning, also fetch that
         git fetch --tags || return 1
@@ -768,7 +783,7 @@ __git_clone_and_checkout() {
             git pull --rebase || return 1
         fi
     else
-        git clone https://github.com/saltstack/salt.git salt || return 1
+        git clone $GIT_REPO salt || return 1
         cd $SALT_GIT_CHECKOUT_DIR
         git checkout $GIT_REV || return 1
     fi
